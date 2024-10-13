@@ -27,7 +27,7 @@ let difficultyLevel = 1;
 let obstacleSpeed = 3; // Reduced from 5
 let obstacleSpawnRate = 0.01; // Reduced from 0.02;
 
-// Add these variables near the top of the file
+// Modify these variables
 let upButtonPressed = false;
 let downButtonPressed = false;
 let buttonPressInterval;
@@ -389,7 +389,7 @@ document.addEventListener('keyup', (e) => {
     }
 });
 
-// Modify the touch event listeners for mobile buttons
+// Update the touch event listeners for mobile buttons
 upBtn.addEventListener('touchstart', (e) => {
     e.preventDefault();
     if (isGameRunning) {
@@ -411,9 +411,6 @@ upBtn.addEventListener('touchend', (e) => {
     upButtonPressed = false;
     if (!downButtonPressed) {
         clearInterval(buttonPressInterval);
-        if (isGameRunning) {
-            bike.velocityY *= 0.5;
-        }
     }
 });
 
@@ -422,21 +419,15 @@ downBtn.addEventListener('touchend', (e) => {
     downButtonPressed = false;
     if (!upButtonPressed) {
         clearInterval(buttonPressInterval);
-        if (isGameRunning) {
-            bike.velocityY *= 0.5;
-        }
     }
 });
 
-// Add touchcancel events
+// Update touchcancel events
 upBtn.addEventListener('touchcancel', (e) => {
     e.preventDefault();
     upButtonPressed = false;
     if (!downButtonPressed) {
         clearInterval(buttonPressInterval);
-        if (isGameRunning) {
-            bike.velocityY *= 0.5;
-        }
     }
 });
 
@@ -445,21 +436,24 @@ downBtn.addEventListener('touchcancel', (e) => {
     downButtonPressed = false;
     if (!upButtonPressed) {
         clearInterval(buttonPressInterval);
-        if (isGameRunning) {
-            bike.velocityY *= 0.5;
-        }
     }
 });
 
 function handleButtonPress() {
-    clearInterval(buttonPressInterval);
+    if (buttonPressInterval) {
+        clearInterval(buttonPressInterval);
+    }
+    
     buttonPressInterval = setInterval(() => {
         if (upButtonPressed) {
             bike.velocityY = Math.max(bike.velocityY - bike.speed, -bike.maxSpeed);
         } else if (downButtonPressed) {
             bike.velocityY = Math.min(bike.velocityY + bike.speed, bike.maxSpeed);
+        } else {
+            // If no button is pressed, gradually slow down
+            bike.velocityY *= 0.95;
         }
-    }, 50); // Adjust this value to change the responsiveness of held buttons
+    }, 16); // Run at approximately 60 FPS
 }
 
 // Add these lines near the top of the file, after the initial variable declarations
