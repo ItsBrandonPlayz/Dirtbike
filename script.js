@@ -27,6 +27,11 @@ let difficultyLevel = 1;
 let obstacleSpeed = 3; // Reduced from 5
 let obstacleSpawnRate = 0.01; // Reduced from 0.02;
 
+// Add these variables near the top of the file
+let upButtonPressed = false;
+let downButtonPressed = false;
+let buttonPressInterval;
+
 // Background layers
 const backgroundLayers = [
     { speed: 1, elements: [] },
@@ -384,34 +389,78 @@ document.addEventListener('keyup', (e) => {
     }
 });
 
-// Add touch event listeners for mobile buttons
+// Modify the touch event listeners for mobile buttons
 upBtn.addEventListener('touchstart', (e) => {
     e.preventDefault();
     if (isGameRunning) {
-        bike.velocityY = Math.max(bike.velocityY - bike.speed, -bike.maxSpeed);
+        upButtonPressed = true;
+        handleButtonPress();
     }
 });
 
 downBtn.addEventListener('touchstart', (e) => {
     e.preventDefault();
     if (isGameRunning) {
-        bike.velocityY = Math.min(bike.velocityY + bike.speed, bike.maxSpeed);
+        downButtonPressed = true;
+        handleButtonPress();
     }
 });
 
 upBtn.addEventListener('touchend', (e) => {
     e.preventDefault();
-    if (isGameRunning) {
-        bike.velocityY *= 0.5;
+    upButtonPressed = false;
+    if (!downButtonPressed) {
+        clearInterval(buttonPressInterval);
+        if (isGameRunning) {
+            bike.velocityY *= 0.5;
+        }
     }
 });
 
 downBtn.addEventListener('touchend', (e) => {
     e.preventDefault();
-    if (isGameRunning) {
-        bike.velocityY *= 0.5;
+    downButtonPressed = false;
+    if (!upButtonPressed) {
+        clearInterval(buttonPressInterval);
+        if (isGameRunning) {
+            bike.velocityY *= 0.5;
+        }
     }
 });
+
+// Add touchcancel events
+upBtn.addEventListener('touchcancel', (e) => {
+    e.preventDefault();
+    upButtonPressed = false;
+    if (!downButtonPressed) {
+        clearInterval(buttonPressInterval);
+        if (isGameRunning) {
+            bike.velocityY *= 0.5;
+        }
+    }
+});
+
+downBtn.addEventListener('touchcancel', (e) => {
+    e.preventDefault();
+    downButtonPressed = false;
+    if (!upButtonPressed) {
+        clearInterval(buttonPressInterval);
+        if (isGameRunning) {
+            bike.velocityY *= 0.5;
+        }
+    }
+});
+
+function handleButtonPress() {
+    clearInterval(buttonPressInterval);
+    buttonPressInterval = setInterval(() => {
+        if (upButtonPressed) {
+            bike.velocityY = Math.max(bike.velocityY - bike.speed, -bike.maxSpeed);
+        } else if (downButtonPressed) {
+            bike.velocityY = Math.min(bike.velocityY + bike.speed, bike.maxSpeed);
+        }
+    }, 50); // Adjust this value to change the responsiveness of held buttons
+}
 
 // Add these lines near the top of the file, after the initial variable declarations
 let highScore = localStorage.getItem('highScore') || 0;
